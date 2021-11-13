@@ -22,12 +22,14 @@ from geopy.distance import geodesic, GeodesicDistance
 BASE_URL = "https://maps.googleapis.com/maps/api/place/"
 RADAR_URL = BASE_URL + "radarsearch/json?location={},{}&radius={}&types={}&key={}"
 NEARBY_URL = BASE_URL + "nearbysearch/json?location={},{}&radius={}&types={}&key={}"
-DETAIL_URL = BASE_URL + "details/json?placeid={}&key={}"
+DETAIL_URL = BASE_URL + "details/json?placeid={}&key={}&language=en"
 
 # user agent for populartimes request
-USER_AGENT = {"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_1) "
-                            "AppleWebKit/537.36 (KHTML, like Gecko) "
-                            "Chrome/54.0.2840.98 Safari/537.36"}
+USER_AGENT = {
+    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_1) "
+    "AppleWebKit/537.36 (KHTML, like Gecko) "
+    "Chrome/54.0.2840.98 Safari/537.36"
+}
 
 
 class PopulartimesException(Exception):
@@ -43,7 +45,9 @@ class PopulartimesException(Exception):
         self.message = message
 
 
-def rect_circle_collision(rect_left, rect_right, rect_bottom, rect_top, circle_x, circle_y, radius):
+def rect_circle_collision(
+    rect_left, rect_right, rect_bottom, rect_top, circle_x, circle_y, radius
+):
     # returns true iff circle intersects rectangle
 
     def clamp(val, min, max):
@@ -132,11 +136,8 @@ def get_circle_centers(b1, b2, radius):
 
     circles = cover_rect_with_cicles(dist_lat, dist_lng, radius)
     cords = [
-        GeodesicDistance(meters=c[0])
-            .destination(
-            GeodesicDistance(meters=c[1])
-                .destination(point=sw, bearing=90),
-            bearing=0
+        GeodesicDistance(meters=c[0]).destination(
+            GeodesicDistance(meters=c[1]).destination(point=sw, bearing=90), bearing=0
         )[:2]
         for c in circles
     ]
@@ -146,9 +147,9 @@ def get_circle_centers(b1, b2, radius):
 
 def worker_radar():
     """
-      worker that gets coordinates of queue and starts radar search
-      :return:
-      """
+    worker that gets coordinates of queue and starts radar search
+    :return:
+    """
     while True:
         item = q_radar.get()
         get_radar(item)
@@ -173,7 +174,7 @@ def get_radar(item):
             sleep(min_wait - sec_passed)
         radar_str += "&pagetoken=" + item["next_page_token"]
 
-    resp = json.loads(requests.get(radar_str, auth=('user', 'pass')).text)
+    resp = json.loads(requests.get(radar_str, auth=("user", "pass")).text)
     check_response_code(resp)
 
     radar = resp["results"]
@@ -188,8 +189,10 @@ def get_radar(item):
     for place in radar:
 
         geo = place["geometry"]["location"]
-        if bounds["lower"]["lat"] <= geo["lat"] <= bounds["upper"]["lat"] \
-                and bounds["lower"]["lng"] <= geo["lng"] <= bounds["upper"]["lng"]:
+        if (
+            bounds["lower"]["lat"] <= geo["lat"] <= bounds["upper"]["lat"]
+            and bounds["lower"]["lng"] <= geo["lng"] <= bounds["upper"]["lng"]
+        ):
             # this isn't thread safe, but we don't really care,
             # since in worst case a set entry is simply overwritten
             g_places[place["place_id"]] = place
@@ -235,7 +238,7 @@ def get_popularity_for_day(popularity):
 
                 # check if the waiting string is available and convert no minutes
                 if len(hour_info) > 5:
-                    wait_digits = re.findall(r'\d+', hour_info[3])
+                    wait_digits = re.findall(r"\d+", hour_info[3])
 
                     if len(wait_digits) == 0:
                         wait_json[day_no - 1][hour] = 0
@@ -244,26 +247,24 @@ def get_popularity_for_day(popularity):
                     elif "hour" in hour_info[3]:
                         wait_json[day_no - 1][hour] = int(wait_digits[0]) * 60
                     else:
-                        wait_json[day_no - 1][hour] = int(wait_digits[0]) * 60 + int(wait_digits[1])
+                        wait_json[day_no - 1][hour] = int(wait_digits[0]) * 60 + int(
+                            wait_digits[1]
+                        )
 
                 # day wrap
                 if hour_info[0] == 23:
                     day_no = day_no % 7 + 1
 
     ret_popularity = [
-        {
-            "name": list(calendar.day_name)[d],
-            "data": pop_json[d]
-        } for d in range(7)
+        {"name": list(calendar.day_name)[d], "data": pop_json[d]} for d in range(7)
     ]
 
     # waiting time only if applicable
-    ret_wait = [
-        {
-            "name": list(calendar.day_name)[d],
-            "data": wait_json[d]
-        } for d in range(7)
-    ] if any(any(day) for day in wait_json) else []
+    ret_wait = (
+        [{"name": list(calendar.day_name)[d], "data": wait_json[d]} for d in range(7)]
+        if any(any(day) for day in wait_json)
+        else []
+    )
 
     # {"name" : "monday", "data": [...]} for each weekday as list
     return ret_popularity, ret_wait
@@ -290,7 +291,9 @@ def index_get(array, *argv):
         return None
 
 
-def add_optional_parameters(detail_json, detail, rating, rating_n, popularity, current_popularity, time_spent):
+def add_optional_parameters(
+    detail_json, detail, rating, rating_n, popularity, current_popularity, time_spent
+):
     """
     check for optional return parameters and add them to the result json
     :param detail_json:
@@ -346,36 +349,42 @@ def get_populartimes_from_search(name, address):
         "hl": "en",
         "q": urllib.parse.quote_plus(place_identifier),
         "pb": "!4m12!1m3!1d4005.9771522653964!2d-122.42072974863942!3d37.8077459796541!2m3!1f0!2f0!3f0!3m2!1i1125!2i976"
-              "!4f13.1!7i20!10b1!12m6!2m3!5m1!6e2!20e3!10b1!16b1!19m3!2m2!1i392!2i106!20m61!2m2!1i203!2i100!3m2!2i4!5b1"
-              "!6m6!1m2!1i86!2i86!1m2!1i408!2i200!7m46!1m3!1e1!2b0!3e3!1m3!1e2!2b1!3e2!1m3!1e2!2b0!3e3!1m3!1e3!2b0!3e3!"
-              "1m3!1e4!2b0!3e3!1m3!1e8!2b0!3e3!1m3!1e3!2b1!3e2!1m3!1e9!2b1!3e2!1m3!1e10!2b0!3e3!1m3!1e10!2b1!3e2!1m3!1e"
-              "10!2b0!3e4!2b1!4b1!9b0!22m6!1sa9fVWea_MsX8adX8j8AE%3A1!2zMWk6Mix0OjExODg3LGU6MSxwOmE5ZlZXZWFfTXNYOGFkWDh"
-              "qOEFFOjE!7e81!12e3!17sa9fVWea_MsX8adX8j8AE%3A564!18e15!24m15!2b1!5m4!2b1!3b1!5b1!6b1!10m1!8e3!17b1!24b1!"
-              "25b1!26b1!30m1!2b1!36b1!26m3!2m2!1i80!2i92!30m28!1m6!1m2!1i0!2i0!2m2!1i458!2i976!1m6!1m2!1i1075!2i0!2m2!"
-              "1i1125!2i976!1m6!1m2!1i0!2i0!2m2!1i1125!2i20!1m6!1m2!1i0!2i956!2m2!1i1125!2i976!37m1!1e81!42b1!47m0!49m1"
-              "!3b1"
+        "!4f13.1!7i20!10b1!12m6!2m3!5m1!6e2!20e3!10b1!16b1!19m3!2m2!1i392!2i106!20m61!2m2!1i203!2i100!3m2!2i4!5b1"
+        "!6m6!1m2!1i86!2i86!1m2!1i408!2i200!7m46!1m3!1e1!2b0!3e3!1m3!1e2!2b1!3e2!1m3!1e2!2b0!3e3!1m3!1e3!2b0!3e3!"
+        "1m3!1e4!2b0!3e3!1m3!1e8!2b0!3e3!1m3!1e3!2b1!3e2!1m3!1e9!2b1!3e2!1m3!1e10!2b0!3e3!1m3!1e10!2b1!3e2!1m3!1e"
+        "10!2b0!3e4!2b1!4b1!9b0!22m6!1sa9fVWea_MsX8adX8j8AE%3A1!2zMWk6Mix0OjExODg3LGU6MSxwOmE5ZlZXZWFfTXNYOGFkWDh"
+        "qOEFFOjE!7e81!12e3!17sa9fVWea_MsX8adX8j8AE%3A564!18e15!24m15!2b1!5m4!2b1!3b1!5b1!6b1!10m1!8e3!17b1!24b1!"
+        "25b1!26b1!30m1!2b1!36b1!26m3!2m2!1i80!2i92!30m28!1m6!1m2!1i0!2i0!2m2!1i458!2i976!1m6!1m2!1i1075!2i0!2m2!"
+        "1i1125!2i976!1m6!1m2!1i0!2i0!2m2!1i1125!2i20!1m6!1m2!1i0!2i956!2m2!1i1125!2i976!37m1!1e81!42b1!47m0!49m1"
+        "!3b1",
     }
 
-    search_url = "https://www.google.de/search?" + "&".join(k + "=" + str(v) for k, v in params_url.items())
+    search_url = "https://www.google.de/search?" + "&".join(
+        k + "=" + str(v) for k, v in params_url.items()
+    )
     logging.info("searchterm: " + search_url)
 
     # noinspection PyUnresolvedReferences
     gcontext = ssl.SSLContext(ssl.PROTOCOL_TLSv1)
 
-    resp = urllib.request.urlopen(urllib.request.Request(url=search_url, data=None, headers=USER_AGENT),
-                                  context=gcontext)
-    data = resp.read().decode('utf-8').split('/*""*/')[0]
+    resp = urllib.request.urlopen(
+        urllib.request.Request(url=search_url, data=None, headers=USER_AGENT),
+        context=gcontext,
+    )
+    data = resp.read().decode("utf-8").split('/*""*/')[0]
 
     # find eof json
     jend = data.rfind("}")
     if jend >= 0:
-        data = data[:jend + 1]
+        data = data[: jend + 1]
 
     jdata = json.loads(data)["d"]
     jdata = json.loads(jdata[4:])
 
     # check if proper and numeric address, i.e. multiple components and street number
-    is_proper_address = any(char.isspace() for char in address.strip()) and any(char.isdigit() for char in address)
+    is_proper_address = any(char.isspace() for char in address.strip()) and any(
+        char.isdigit() for char in address
+    )
 
     info = index_get(jdata, 0, 1, 0 if is_proper_address else 1, 14)
 
@@ -392,8 +401,13 @@ def get_populartimes_from_search(name, address):
     # extract wait times and convert to minutes
     if time_spent:
 
-        nums = [float(f) for f in re.findall(r'\d*\.\d+|\d+', time_spent.replace(",", "."))]
-        contains_min, contains_hour = "min" in time_spent, "hour" in time_spent or "hr" in time_spent
+        nums = [
+            float(f) for f in re.findall(r"\d*\.\d+|\d+", time_spent.replace(",", "."))
+        ]
+        contains_min, contains_hour = (
+            "min" in time_spent,
+            "hour" in time_spent or "hr" in time_spent,
+        )
 
         time_spent = None
 
@@ -434,7 +448,7 @@ def get_populartimes(api_key, place_id):
     # places api - detail search
     # https://developers.google.com/places/web-service/details?hl=de
     detail_str = DETAIL_URL.format(place_id, api_key)
-    resp = json.loads(requests.get(detail_str, auth=('user', 'pass')).text)
+    resp = json.loads(requests.get(detail_str, auth=("user", "pass")).text)
     check_response_code(resp)
     detail = resp["result"]
 
@@ -442,19 +456,23 @@ def get_populartimes(api_key, place_id):
 
 
 def get_populartimes_by_detail(api_key, detail):
-    address = detail["formatted_address"] if "formatted_address" in detail else detail.get("vicinity", "")
+    address = (
+        detail["formatted_address"]
+        if "formatted_address" in detail
+        else detail.get("vicinity", "")
+    )
 
     detail_json = {
         "id": detail["place_id"],
         "name": detail["name"],
         "address": address,
         "types": detail["types"],
-        "coordinates": detail["geometry"]["location"]
+        "coordinates": detail["geometry"]["location"],
     }
 
-    detail_json = add_optional_parameters(detail_json, detail, *get_populartimes_from_search(
-        detail["name"], address
-    ))
+    detail_json = add_optional_parameters(
+        detail_json, detail, *get_populartimes_from_search(detail["name"], address)
+    )
 
     return detail_json
 
@@ -469,31 +487,43 @@ def check_response_code(resp):
         return
 
     if resp["status"] == "REQUEST_DENIED":
-        raise PopulartimesException("Google Places " + resp["status"],
-                                    "Request was denied, the API key is invalid.")
+        raise PopulartimesException(
+            "Google Places " + resp["status"],
+            "Request was denied, the API key is invalid.",
+        )
 
     if resp["status"] == "OVER_QUERY_LIMIT":
-        raise PopulartimesException("Google Places " + resp["status"],
-                                    "You exceeded your Query Limit for Google Places API Web Service, "
-                                    "check https://developers.google.com/places/web-service/usage "
-                                    "to upgrade your quota.")
+        raise PopulartimesException(
+            "Google Places " + resp["status"],
+            "You exceeded your Query Limit for Google Places API Web Service, "
+            "check https://developers.google.com/places/web-service/usage "
+            "to upgrade your quota.",
+        )
 
     if resp["status"] == "INVALID_REQUEST":
-        raise PopulartimesException("Google Places " + resp["status"],
-                                    "The query string is malformed, "
-                                    "check if your formatting for lat/lng and radius is correct.")
+        raise PopulartimesException(
+            "Google Places " + resp["status"],
+            "The query string is malformed, "
+            "check if your formatting for lat/lng and radius is correct.",
+        )
 
     if resp["status"] == "INVALID_REQUEST":
-        raise PopulartimesException("Google Places " + resp["status"],
-                                    "The query string is malformed, "
-                                    "check if your formatting for lat/lng and radius is correct.")
+        raise PopulartimesException(
+            "Google Places " + resp["status"],
+            "The query string is malformed, "
+            "check if your formatting for lat/lng and radius is correct.",
+        )
 
     if resp["status"] == "NOT_FOUND":
-        raise PopulartimesException("Google Places " + resp["status"],
-                                    "The place ID was not found and either does not exist or was retired.")
+        raise PopulartimesException(
+            "Google Places " + resp["status"],
+            "The place ID was not found and either does not exist or was retired.",
+        )
 
-    raise PopulartimesException("Google Places " + resp["status"],
-                                "Unidentified error with the Places API, please check the response code")
+    raise PopulartimesException(
+        "Google Places " + resp["status"],
+        "Unidentified error with the Places API, please check the response code",
+    )
 
 
 def run(_params):
@@ -520,9 +550,11 @@ def run(_params):
 
     # cover search area with circles
     bounds = params["bounds"]
-    for lat, lng in get_circle_centers([bounds["lower"]["lat"], bounds["lower"]["lng"]],  # southwest
-                                       [bounds["upper"]["lat"], bounds["upper"]["lng"]],  # northeast
-                                       params["radius"]):
+    for lat, lng in get_circle_centers(
+        [bounds["lower"]["lat"], bounds["lower"]["lng"]],  # southwest
+        [bounds["upper"]["lat"], bounds["upper"]["lng"]],  # northeast
+        params["radius"],
+    ):
         q_radar.put(dict(pos=(lat, lng), res=0))
 
     q_radar.join()
