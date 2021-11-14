@@ -1,5 +1,9 @@
 # 2021 Cathay Hackerthon - Team 10 All IT Dragon
 
+## What is this?
+
+The code demonstrate how we utilitize Google Map API and Place API to let our users to check out the tourist attractions and restaurants nearby right when they land at their destination.
+
 ## Run it locally (Not in VM)
 
 ```
@@ -82,7 +86,6 @@ Create a .env file under the server folder, and set the environment variable:
 
 ```
 PORT=3001
-MONGO_URL=your_own_mongodb_uri
 NODE_ENV=development
 JTW_TOKEN=your_token
 API_KEY=your_google_api_key
