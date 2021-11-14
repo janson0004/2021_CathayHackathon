@@ -14,7 +14,8 @@ import Logo from "./images/Cathay_logo.png";
 import AsiaMileButton from "./images/AsiaMileButton.png";
 import RecommendRes from "../components/RecommendRes";
 import HorizontalScroll from "react-scroll-horizontal";
-
+import LandmarkRes from "../components/LandmarkRes";
+import Tab from "./images/Tabs.png";
 const Home = () => {
   const mapContainerStyle = {
     width: "100%",
@@ -30,20 +31,30 @@ const Home = () => {
   };
   const [libraries] = useState(["places"]);
   const [center, setCenter] = useState({
-    lat: 22.310993034714123,
-    lng: 114.24018913494935,
+    lat: 22.300594216049767,
+    lng: 114.1732205836626,
   });
   const { isLoaded, loadError } = useLoadScript({
     googleMapsApiKey: process.env.REACT_APP_MAP_API_KEY,
     libraries,
   });
   const [restaurants, setRestaurant] = useState(null);
+  const [landmarks, setLandmarks] = useState(null);
+
   //   const history = useNavigate();
   useEffect(() => {
     axios
       .get("/restaurant", { withCredentials: true })
       .then((response) => {
         setRestaurant(response.data);
+      })
+      .catch((error) => {
+        console.log("Error");
+      });
+    axios
+      .get("/landmark", { withCredentials: true })
+      .then((response) => {
+        setLandmarks(response.data);
       })
       .catch((error) => {
         console.log("Error");
@@ -58,11 +69,11 @@ const Home = () => {
   if (!isLoaded) return "";
 
   return (
-    <>
+    <Wrapper>
       <NavBar>
         <img src={AsiaMileButton} />
         <CathayLogo src={Logo} />
-        <div />
+        <EmptyDiv />
       </NavBar>
       <GoogleMap
         mapContainerStyle={mapContainerStyle}
@@ -83,8 +94,19 @@ const Home = () => {
               />
             ))
           : ""}
+        {landmarks
+          ? landmarks.map((marker, index) => (
+              <Marker
+                key={marker.name}
+                position={{
+                  lat: marker.coordinates.lat,
+                  lng: marker.coordinates.lng,
+                }}
+              />
+            ))
+          : ""}
       </GoogleMap>
-      <Title>Recommend for you</Title>
+      <Title>Popular Restaurants Nearby</Title>
       <RecomendDiv>
         {restaurants
           ? restaurants.map((place, index) => (
@@ -92,7 +114,15 @@ const Home = () => {
             ))
           : ""}
       </RecomendDiv>
-    </>
+      <Title>Popular landmark Nearby</Title>
+      <RecomendDiv>
+        {landmarks
+          ? landmarks.map((place, index) => <LandmarkRes restaurant={place} />)
+          : ""}
+      </RecomendDiv>
+      <Block />
+      <Footer src={Tab} />
+    </Wrapper>
   );
 };
 
@@ -100,14 +130,19 @@ export default Home;
 
 const RecomendDiv = styled.div`
   display: flex;
-  overflow-x: auto;
+  overflow-x: scroll;
   overflow-y: hidden;
   height: 135px;
   padding-left: 16px;
   align-items: center;
+  -webkit-scrollbar {
+    display: none;
+  }
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 `;
 const Title = styled.h2`
-  padding-top: 37px;
+  padding-top: 35px;
   font-weight: 500;
   font-size: 18px;
   color: #4c4c4c;
@@ -120,7 +155,24 @@ const NavBar = styled.div`
   height: 50px;
   align-items: center;
   padding-left: 16px;
+  padding-right: 16px;
   justify-content: space-between;
 `;
-
+const EmptyDiv = styled.div`
+  width: 38px;
+  height: 17px;
+`;
 const CathayLogo = styled.img``;
+
+const Wrapper = styled.div`
+  overflow: auto;
+`;
+
+const Footer = styled.img`
+  position: fixed;
+  bottom: 0;
+`;
+
+const Block = styled.div`
+  height: 100px;
+`;

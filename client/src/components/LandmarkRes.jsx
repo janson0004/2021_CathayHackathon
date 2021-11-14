@@ -1,9 +1,9 @@
 import React, { useEffect } from "react";
 import styled from "styled-components/macro";
 import { FaStar } from "react-icons/fa";
-import Restaurant from "../views/images/restaurant.jpg";
+
 import Landmark from "../views/images/Landmark.jpg";
-const RecommendRes = ({ restaurant }) => {
+const LandmarkRes = ({ restaurant }) => {
   useEffect(() => {
     console.log(restaurant.name);
   }, [restaurant]);
@@ -11,7 +11,7 @@ const RecommendRes = ({ restaurant }) => {
     <div>
       <Wrapper>
         {/* <PhotoDiv src={Restaurant} /> */}
-        <PhotoDiv src={Restaurant} />
+        <PhotoDiv src={Landmark} />
 
         <Information>
           <Title>{restaurant.name}</Title>
@@ -34,7 +34,7 @@ const RecommendRes = ({ restaurant }) => {
   );
 };
 
-export default RecommendRes;
+export default LandmarkRes;
 
 const Wrapper = styled.div`
   display: flex;

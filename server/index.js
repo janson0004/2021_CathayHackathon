@@ -24,6 +24,19 @@ app.get("/restaurant", (req, res) => {
   });
 });
 
+app.get("/landmark", (req, res) => {
+  let dataset = [];
+  const python = spawn("python3", ["populartimes_landmark_api.py"]);
+
+  python.stdout.on("data", (data) => {
+    dataset.push(data);
+  });
+
+  python.on("close", (code) => {
+    console.log(dataset.join(""));
+    res.json(JSON.parse(dataset.join("")));
+  });
+});
 app.get("/", (req, res) => {
   res.send("Server is running!!");
 });
