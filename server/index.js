@@ -11,8 +11,11 @@ app.use(express.json());
 app.use(cookieParser());
 
 app.get("/restaurant", (req, res) => {
+  const lat = req.query.lat;
+  const lng = req.query.lng;
+
   let dataset = [];
-  const python = spawn("python3", ["populartimes_api.py"]);
+  const python = spawn("python3", ["populartimes_api.py", lat, lng]);
 
   python.stdout.on("data", (data) => {
     dataset.push(data);
@@ -25,8 +28,11 @@ app.get("/restaurant", (req, res) => {
 });
 
 app.get("/landmark", (req, res) => {
+  const lat = req.query.lat;
+  const lng = req.query.lng;
+
   let dataset = [];
-  const python = spawn("python3", ["populartimes_landmark_api.py"]);
+  const python = spawn("python3", ["populartimes_landmark_api.py", lat, lng]);
 
   python.stdout.on("data", (data) => {
     dataset.push(data);

@@ -1,70 +1,89 @@
-# Getting Started with Create React App
+# 2021 Cathay Hackerthon - Team 10 All IT Dragon
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+## Run it locally (Not in VM)
 
-## Available Scripts
+```
+git clone https://github.com/janson0004/2021_CathayHackathon.git
+```
 
-In the project directory, you can run:
+### client
 
-### `yarn start`
+Navigate to client folder, install dependencies
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+```
+cd client
+npm install
+```
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+Start the client side
 
-### `yarn test`
+```
+npm start
+```
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+#### Environment variable
 
-### `yarn build`
+Create a .env.local file under the client folder, and set the environment variable:
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+```
+REACT_APP_MAP_API_KEY=your_google_api_key
+```
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+### server
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+Navigate to client folder, install dependencies
 
-### `yarn eject`
+```
+cd server
+npm install
+```
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+Start the server side
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+```
+npm start
+```
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+#### Setup virtual environment for python
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+> mac
 
-## Learn More
+```
+python3 -m venv env       # Create virtual environment
+source env/bin/activate   # Get into virtual environment
+```
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+```
+deactivate                # Exit virtual environment
+```
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+> windows
 
-### Code Splitting
+```
+pip install virtualenv
+virtualenv env
+\env\Scripts\activate.bat
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+#### Install dependencies for python
 
-### Analyzing the Bundle Size
+```
+pip3 install -r requirements.txt
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+```
+cd populartimes
+pip3 install .
+```
 
-### Making a Progressive Web App
+#### Environment variable
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+Create a .env file under the server folder, and set the environment variable:
 
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `yarn build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+```
+PORT=3001
+MONGO_URL=your_own_mongodb_uri
+NODE_ENV=development
+JTW_TOKEN=your_token
+API_KEY=your_google_api_key
+```

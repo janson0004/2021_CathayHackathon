@@ -9,6 +9,10 @@ load_dotenv()
 
 API_KEY = os.getenv("API_KEY")
 
+lat1 = float(sys.argv[1])
+lng1 = float(sys.argv[2])
+lat2 = lat1 + 0.004
+lng2 = lng1 + 0.03
 
 # response = json.dumps(populartimes.get_id(API_KEY, "ChIJSYuuSx9awokRyrrOFTGg0GY"))
 response = json.dumps(
@@ -17,8 +21,8 @@ response = json.dumps(
         [
             "shopping_mall",
         ],
-        (22.29385026449464, 114.16952061043037),
-        (22.304930063697, 114.16204633104684),
+        (lat1, lng1),
+        (lat2, lng2),
     )
 )
 

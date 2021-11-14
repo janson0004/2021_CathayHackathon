@@ -30,6 +30,12 @@ const Home = () => {
     zoomControl: false,
   };
   const [libraries] = useState(["places"]);
+
+  const panTo = useCallback((pan, zoom) => {
+    googleMap.current.panTo(pan);
+    googleMap.current.setZoom(zoom);
+  }, []);
+
   const [center, setCenter] = useState({
     lat: 22.300594216049767,
     lng: 114.1732205836626,
@@ -44,7 +50,10 @@ const Home = () => {
   //   const history = useNavigate();
   useEffect(() => {
     axios
-      .get("/restaurant", { withCredentials: true })
+      .get("/restaurant", {
+        withCredentials: true,
+        params: { lat: center.lat, lng: center.lng },
+      })
       .then((response) => {
         setRestaurant(response.data);
       })
@@ -52,7 +61,10 @@ const Home = () => {
         console.log("Error");
       });
     axios
-      .get("/landmark", { withCredentials: true })
+      .get("/landmark", {
+        withCredentials: true,
+        params: { lat: center.lat, lng: center.lng },
+      })
       .then((response) => {
         setLandmarks(response.data);
       })
@@ -63,6 +75,22 @@ const Home = () => {
 
   useEffect(() => {
     console.log(restaurants);
+  }, [restaurants]);
+
+  useEffect(() => {
+    try {
+      panTo(
+        {
+          lat: center.lat,
+          lng: center.lng,
+        },
+        17
+      );
+
+      console.log(center);
+    } catch (error) {
+      console.log(error);
+    }
   }, [restaurants]);
 
   if (loadError) return "";
@@ -77,7 +105,7 @@ const Home = () => {
       </NavBar>
       <GoogleMap
         mapContainerStyle={mapContainerStyle}
-        zoom={15}
+        zoom={13}
         center={center}
         options={options}
         ref={googleMap}
@@ -110,14 +138,16 @@ const Home = () => {
       <RecomendDiv>
         {restaurants
           ? restaurants.map((place, index) => (
-              <RecommendRes restaurant={place} />
+              <RecommendRes key={index} restaurant={place} />
             ))
           : ""}
       </RecomendDiv>
       <Title>Popular landmark Nearby</Title>
       <RecomendDiv>
         {landmarks
-          ? landmarks.map((place, index) => <LandmarkRes restaurant={place} />)
+          ? landmarks.map((place, index) => (
+              <LandmarkRes key={index} restaurant={place} />
+            ))
           : ""}
       </RecomendDiv>
       <Block />
